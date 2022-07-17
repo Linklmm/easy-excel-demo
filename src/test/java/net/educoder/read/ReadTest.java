@@ -1,4 +1,4 @@
-package net.educoder;
+package net.educoder.read;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import java.io.File;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import net.educoder.listener.DemoDataListener;
 import net.educoder.pojo.DemoData;
 import org.junit.Test;
 
@@ -21,7 +22,13 @@ public class ReadTest {
   private static final String resource = "demo" + File.separator + "demo.xlsx";
 
   /**
-   * 1.1:简单读写
+   * 2.1:最简单的读 最简单的读
+   * <p>
+   * 1. 创建excel对应的实体对象 参照{@link DemoData}
+   * <p>
+   * 2. 由于默认一行行的读取excel，所以需要创建excel一行一行的回调监听器
+   * <p>
+   * 3. 直接读即可
    */
   @Test
   public void simpleRead() {
@@ -64,5 +71,16 @@ public class ReadTest {
       }
 
     }).sheet().doRead();
+  }
+
+  /**
+   * 2.2:最简单的读监听器
+   */
+  @Test
+  public void listenerTest() {
+// 简单读写 ，第一种写法 使用匿名内部类，不用额外写一个监听器
+    String fileName = this.getClass().getClassLoader().getResource(resource).getPath();
+    // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
+    EasyExcel.read(fileName, DemoData.class, new DemoDataListener()).sheet().doRead();
   }
 }
