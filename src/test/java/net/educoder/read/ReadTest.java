@@ -9,7 +9,11 @@ import java.io.File;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import net.educoder.listener.DemoDataListener;
+import net.educoder.listener.IndexDataListener;
+import net.educoder.listener.NameDataListener;
 import net.educoder.pojo.DemoData;
+import net.educoder.pojo.IndexData;
+import net.educoder.pojo.NameData;
 import org.junit.Test;
 
 /**
@@ -82,5 +86,23 @@ public class ReadTest {
     String fileName = this.getClass().getClassLoader().getResource(resource).getPath();
     // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
     EasyExcel.read(fileName, DemoData.class, new DemoDataListener()).sheet().doRead();
+  }
+
+  /**
+   * 2.3：指定列的下标
+   */
+  @Test
+  public void indexData() {
+    String fileName = this.getClass().getClassLoader().getResource(resource).getPath();
+    EasyExcel.read(fileName, IndexData.class, new IndexDataListener()).sheet().doRead();
+  }
+
+  /**
+   * 2.4：指定列的列名
+   */
+  @Test
+  public void nameData() {
+    String fileName = this.getClass().getClassLoader().getResource(resource).getPath();
+    EasyExcel.read(fileName, NameData.class, new NameDataListener()).sheet().doRead();
   }
 }
