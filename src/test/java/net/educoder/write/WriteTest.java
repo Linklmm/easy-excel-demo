@@ -1,6 +1,8 @@
 package net.educoder.write;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
 import net.educoder.pojo.DemoData;
 import org.junit.Test;
@@ -30,6 +32,14 @@ public class WriteTest {
                 .sheet("简单写")
                 .doWrite(this::data);
         //写法2
+        fileName = path + "simpleWrite02" + ".xlsx";
+        EasyExcel.write(fileName, DemoData.class).sheet("写法2").doWrite(data());
+        //写法3
+        fileName = path + "simpleWrite03" + ".xlsx";
+        try (ExcelWriter excelWriter = EasyExcel.write(fileName, DemoData.class).build()) {
+            WriteSheet writeSheet = EasyExcel.writerSheet("写法3").build();
+            excelWriter.write(data(), writeSheet);
+        }
     }
 
     private List<DemoData> data() {
