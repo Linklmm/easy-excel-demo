@@ -5,6 +5,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
+import net.educoder.pojo.ComplexHeadData;
 import net.educoder.pojo.DemoData;
 import net.educoder.pojo.WriteIndexData;
 import net.educoder.pojo.WriteOrderData;
@@ -96,6 +97,61 @@ public class WriteTest {
         //不会有空列
         fileName = path + "orderWrite.xlsx";
         EasyExcel.write(fileName, WriteOrderData.class).sheet("指定写入的列").doWrite(writeOrderData());
+
+    }
+
+    /**
+     * 3.4 复杂头写入
+     * <p>
+     * 1. 创建excel对应的实体对象 参照{@link ComplexHeadData}
+     * <p>
+     * 2. 使用{@link ExcelProperty}注解指定复杂的头
+     * <p>
+     * 3. 直接写即可
+     */
+    @Test
+    public void complexHeadWrite() {
+        String fileName = path + "complexHeadWrite.xlsx";
+        EasyExcel.write(fileName, ComplexHeadData.class).sheet("复杂的头")
+                .doWrite(data());
+    }
+
+    /**
+     * 3.5 重复多次写入
+     * <p>
+     * 1. 创建excel对应的实体对象 参照{@link ComplexHeadData}
+     * <p>
+     * 2. 使用{@link ExcelProperty}注解指定复杂的头
+     * <p>
+     * 3. 直接调用二次写入即可
+     */
+    @Test
+    public void repeatedWrite() {
+        //方法1：写到同一个sheet
+        String fileName = path + "repeatedWrite01.xlsx";
+        //指定class
+        ExcelWriter excelWriter = EasyExcel.write(fileName, DemoData.class).build();
+        WriteSheet writeSheet = EasyExcel.writerSheet("模板1").build();
+        // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来
+        for (int i = 0; i < 5; i++) {
+            // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
+            List<DemoData> data = data();
+            excelWriter.write(data, writeSheet);
+        }
+
+        // 方法2: 如果写到不同的sheet 同一个对象
+        fileName = path + "repeatedWrite02.xlsx";
+        // 这里 指定文件
+        excelWriter = EasyExcel.write(fileName, DemoData.class).build();
+        // 去调用写入,这里我调用了五次，实际使用时根据数据库分页的总的页数来。这里最终会写到5个sheet里面
+        for (int i = 0; i < 5; i++) {
+            // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
+            WriteSheet writeSheet2 = EasyExcel.writerSheet(i, "模板" + i).build();
+            // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
+            List<DemoData> data = data();
+            excelWriter.write(data, writeSheet2);
+        }
+
 
     }
 
