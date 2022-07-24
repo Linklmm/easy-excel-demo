@@ -90,7 +90,7 @@ public class ReadTest {
    */
   @Test
   public void listenerTest() {
-// 简单读写 ，第一种写法 使用匿名内部类，不用额外写一个监听器
+    // 简单读写 ，第一种写法 使用匿名内部类，不用额外写一个监听器
     String fileName = this.getClass().getClassLoader().getResource(resource).getPath();
     // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
     EasyExcel.read(fileName, DemoData.class, new DemoDataListener()).sheet().doRead();
