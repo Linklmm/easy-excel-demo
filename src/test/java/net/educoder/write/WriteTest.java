@@ -5,8 +5,17 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.alibaba.excel.annotation.format.NumberFormat;
+import com.alibaba.excel.enums.CellDataTypeEnum;
+import com.alibaba.excel.metadata.data.ImageData;
+import com.alibaba.excel.metadata.data.ImageData.ImageType;
+import com.alibaba.excel.metadata.data.WriteCellData;
+import com.alibaba.excel.util.FileUtils;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +23,7 @@ import java.util.Set;
 import net.educoder.pojo.ComplexHeadData;
 import net.educoder.pojo.ConverterData;
 import net.educoder.pojo.DemoData;
+import net.educoder.pojo.ImageDemoData;
 import net.educoder.pojo.WriteIndexData;
 import net.educoder.pojo.WriteOrderData;
 import org.junit.Test;
@@ -193,9 +203,89 @@ public class WriteTest {
    * 3. 直接写即可
    */
   @Test
-  public void convertWrite(){
+  public void convertWrite() {
     String fileName = path + "converterWrite.xlsx";
     EasyExcel.write(fileName, ConverterData.class).sheet("模板").doWrite(data());
+  }
+
+  /**
+   * 3.7 图片导出
+   * <p>
+   * 1. 创建excel对应的实体对象 参照{@link ImageDemoData}
+   * <p>
+   * 2. 直接写即可
+   */
+  @Test
+  public void imageWrite() throws IOException {
+    String fileName = path + "imageWrite.xlsx";
+    String imagePath = path + "imgs" + File.separator + "img.jpg";
+    List<ImageDemoData> list = Lists.newArrayList();
+    try (InputStream inputStream = FileUtils.openInputStream(new File(imagePath))) {
+      ImageDemoData imageDemoData = new ImageDemoData();
+      // 放入五种类型的图片 实际使用只要选一种即可
+      imageDemoData.setByteArray(FileUtils.readFileToByteArray(new File(imagePath)));
+      imageDemoData.setFile(new File(imagePath));
+      imageDemoData.setString(imagePath);
+      imageDemoData.setInputStream(inputStream);
+      imageDemoData.setUrl(new URL(
+          "https://lmm.myfloweryourgrass.cn/blog/logo.png"));
+
+      // 这里演示
+      // 需要额外放入文字
+      // 而且需要放入2个图片
+      // 第一个图片靠左
+      // 第二个靠右 而且要额外的占用他后面的单元格
+      WriteCellData<Void> writeCellData = new WriteCellData<>();
+      // 这里可以设置为 EMPTY 则代表不需要其他数据了
+      writeCellData.setType(CellDataTypeEnum.STRING);
+      writeCellData.setStringValue("额外的放一些文字");
+      
+
+      // 可以放入多个图片
+      List<ImageData> imageDataList = Lists.newArrayList();
+      ImageData imageData = new ImageData();
+      // 放入2进制图片
+      imageData.setImage(FileUtils.readFileToByteArray(new File(imagePath)));
+      // 图片类型
+      imageData.setImageType(ImageType.PICTURE_TYPE_PNG);
+      // 上 右 下 左 需要留空
+      // 这个类似于 css 的 margin
+      // 这里实测 不能设置太大 超过单元格原始大小后 打开会提示修复。暂时未找到很好的解法。
+      imageData.setTop(5);
+      imageData.setRight(40);
+      imageData.setBottom(5);
+      imageData.setLeft(5);
+
+      // 放入第二个图片
+      ImageData imageData2 = new ImageData();
+      imageData2.setImage(FileUtils.readFileToByteArray(new File(imagePath)));
+      imageData2.setImageType(ImageType.PICTURE_TYPE_PNG);
+      imageData2.setTop(5);
+      imageData2.setRight(5);
+      imageData2.setBottom(5);
+      imageData2.setLeft(50);
+
+      // 设置图片的位置 假设 现在目标 是 覆盖 当前单元格 和当前单元格右边的单元格
+      // 起点相对于当前单元格为0 当然可以不写
+      imageData2.setRelativeFirstRowIndex(0);
+      imageData2.setRelativeFirstColumnIndex(0);
+      imageData2.setRelativeLastRowIndex(0);
+      // 前面3个可以不写  下面这个需要写 也就是 结尾 需要相对当前单元格 往右移动一格
+      // 也就是说 这个图片会覆盖当前单元格和 后面的那一格
+      imageData2.setRelativeLastColumnIndex(1);
+
+      imageDataList.add(imageData);
+      imageDataList.add(imageData2);
+      writeCellData.setImageDataList(imageDataList);
+
+      imageDemoData.setWriteCellDataFile(writeCellData);
+      list.add(imageDemoData);
+
+      // 写入数据
+      EasyExcel.write(fileName, ImageDemoData.class).sheet().doWrite(list);
+    }
+
+
   }
 
   private List<DemoData> data() {
