@@ -6,11 +6,18 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.alibaba.excel.annotation.format.NumberFormat;
 import com.alibaba.excel.enums.CellDataTypeEnum;
+import com.alibaba.excel.metadata.data.CommentData;
+import com.alibaba.excel.metadata.data.FormulaData;
+import com.alibaba.excel.metadata.data.HyperlinkData;
+import com.alibaba.excel.metadata.data.HyperlinkData.HyperlinkType;
 import com.alibaba.excel.metadata.data.ImageData;
 import com.alibaba.excel.metadata.data.ImageData.ImageType;
+import com.alibaba.excel.metadata.data.RichTextStringData;
 import com.alibaba.excel.metadata.data.WriteCellData;
 import com.alibaba.excel.util.FileUtils;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.metadata.style.WriteCellStyle;
+import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +31,11 @@ import net.educoder.pojo.ComplexHeadData;
 import net.educoder.pojo.ConverterData;
 import net.educoder.pojo.DemoData;
 import net.educoder.pojo.ImageDemoData;
+import net.educoder.pojo.WriteCellDemoData;
 import net.educoder.pojo.WriteIndexData;
 import net.educoder.pojo.WriteOrderData;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.junit.Test;
 
 /**
@@ -239,7 +249,6 @@ public class WriteTest {
       // 这里可以设置为 EMPTY 则代表不需要其他数据了
       writeCellData.setType(CellDataTypeEnum.STRING);
       writeCellData.setStringValue("额外的放一些文字");
-      
 
       // 可以放入多个图片
       List<ImageData> imageDataList = Lists.newArrayList();
@@ -285,6 +294,88 @@ public class WriteTest {
       EasyExcel.write(fileName, ImageDemoData.class).sheet().doWrite(list);
     }
 
+
+  }
+
+  /**
+   * 3.8 超链接、备注、公式、指定单个单元格的样式、单个单元格多种样式
+   * <p>
+   * 1. 创建excel对应的实体对象 参照{@link WriteCellDemoData}
+   * <p>
+   * 2. 直接写即可
+   *
+   * @since 3.0.0-beta1
+   */
+  @Test
+  public void writeCellDataWrite() {
+    String fileName = path + "writeCellDataWrite.xlsx";
+    WriteCellDemoData writeCellDemoData = new WriteCellDemoData();
+
+    //设置超链接
+    WriteCellData<String> hyperlink = new WriteCellData<>("官方网站");
+    HyperlinkData hyperlinkData = new HyperlinkData();
+    hyperlinkData.setAddress("https://www.educoder.net");
+    hyperlinkData.setHyperlinkType(HyperlinkType.URL);
+
+    hyperlink.setHyperlinkData(hyperlinkData);
+    writeCellDemoData.setHyperlink(hyperlink);
+
+    //设置备注
+    WriteCellData<String> comment = new WriteCellData<>("备注信息");
+    CommentData commentData = new CommentData();
+    commentData.setAuthor("playboy");
+    commentData.setRichTextStringData(new RichTextStringData("这是一个备注"));
+    commentData.setRelativeLastColumnIndex(1);
+    commentData.setRelativeLastRowIndex(1);
+    comment.setCommentData(commentData);
+    writeCellDemoData.setCommentData(comment);
+
+    //设置公式
+    WriteCellData<String> formula = new WriteCellData<>("设置公式");
+    FormulaData formulaData = new FormulaData();
+    // 将 123456789 中的第一个数字替换成 2
+    // 这里只是例子 如果真的涉及到公式 能内存算好尽量内存算好 公式能不用尽量不用
+    formulaData.setFormulaValue("REPLACE(123456789,1,1,2)");
+    formula.setFormulaData(formulaData);
+    writeCellDemoData.setFormulaData(formula);
+
+    // 设置单个单元格的样式 当然样式 很多的话 也可以用注解等方式。
+    // writeCellDemoData-> WriteCellData<String> ->  WriteCellStyle
+    WriteCellData<String> writeCellStyle = new WriteCellData<>("设置单元格样式");
+    writeCellStyle.setType(CellDataTypeEnum.STRING);
+    WriteCellStyle writeCellStyleData = new WriteCellStyle();
+    // 这里需要指定 FillPatternType 为FillPatternType.SOLID_FOREGROUND 不然无法显示背景颜色.
+    writeCellStyleData.setFillPatternType(FillPatternType.SOLID_FOREGROUND);
+    // 背景绿色
+    writeCellStyleData.setFillForegroundColor(IndexedColors.GREEN.getIndex());
+    //设置样式
+    writeCellStyle.setWriteCellStyle(writeCellStyleData);
+    writeCellDemoData.setWriteCellStyle(writeCellStyle);
+
+    // 设置单个单元格多种样式
+    WriteCellData<String> richTest = new WriteCellData<>("设置单个单元格多种样式");
+    richTest.setType(CellDataTypeEnum.RICH_TEXT_STRING);
+    RichTextStringData richTextStringData = new RichTextStringData();
+    richTextStringData.setTextString("红色绿色默认");
+    // 前2个字红色
+    WriteFont writeFont = new WriteFont();
+    writeFont.setColor(IndexedColors.RED.getIndex());
+    richTextStringData.applyFont(0, 2, writeFont);
+    // 接下来2个字绿色
+    WriteFont writeFont2 = new WriteFont();
+    writeFont2.setColor(IndexedColors.GREEN.getIndex());
+    richTextStringData.applyFont(2, 4, writeFont2);
+
+    richTest.setRichTextStringDataValue(richTextStringData);
+
+    writeCellDemoData.setRichText(richTest);
+
+    List<WriteCellDemoData> data = Lists.newArrayList();
+    data.add(writeCellDemoData);
+    EasyExcel.write(fileName, WriteCellDemoData.class)
+        .inMemory(true)
+        .sheet("设置单元格")
+        .doWrite(data);
 
   }
 
