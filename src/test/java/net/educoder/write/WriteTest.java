@@ -3,6 +3,8 @@ package net.educoder.write;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.alibaba.excel.annotation.format.NumberFormat;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
 import java.util.Date;
@@ -10,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import net.educoder.pojo.ComplexHeadData;
+import net.educoder.pojo.ConverterData;
 import net.educoder.pojo.DemoData;
 import net.educoder.pojo.WriteIndexData;
 import net.educoder.pojo.WriteOrderData;
@@ -178,6 +181,21 @@ public class WriteTest {
       }
     }
 
+  }
+
+  /**
+   * 3.6 日期、数字或者自定义格式转换
+   * <p>
+   * 1. 创建excel对应的实体对象 参照{@link ConverterData}
+   * <p>
+   * 2. 使用{@link ExcelProperty}配合使用注解{@link DateTimeFormat}、{@link NumberFormat}或者自定义注解
+   * <p>
+   * 3. 直接写即可
+   */
+  @Test
+  public void convertWrite(){
+    String fileName = path + "converterWrite.xlsx";
+    EasyExcel.write(fileName, ConverterData.class).sheet("模板").doWrite(data());
   }
 
   private List<DemoData> data() {
