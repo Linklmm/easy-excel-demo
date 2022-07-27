@@ -3,7 +3,6 @@ package net.educoder.pojo;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.alibaba.excel.annotation.format.NumberFormat;
-import java.util.Date;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,11 +26,11 @@ public class ConverterData {
    */
   @DateTimeFormat("yyyy年MM月dd日HH时mm分ss秒")
   @ExcelProperty("日期标题")
-  private Date date;
+  private String date;
   /**
    * 我想接收百分比的数字
    */
   @NumberFormat("#.##%")
   @ExcelProperty(value = "数字标题")
-  private Double doubleData;
+  private String doubleData;
 }
